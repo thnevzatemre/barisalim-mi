@@ -338,7 +338,7 @@
         <div id="video-container">
             <iframe
                 id="loveSongPlayer"
-                src="https://www.youtube.com/watch?v=WdnULqAm824"
+                src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID5"
                 allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
                 title="Yalın - En Baştan">
@@ -355,7 +355,7 @@
         const resultDiv = document.getElementById('result');
         const mainQuestion = document.getElementById('main-question');
         const noMessageContainer = document.getElementById('no-message-container');
-        const loveSongPlayer = document.getElementById('loveSongPlayer'); // Video oynatıcımızı seçtik
+        const loveSongPlayerIframe = document.getElementById('loveSongPlayer'); // iframe elementini aldık
 
         let yesScale = 1;
         let messageIndex = 0; // Mesaj dizisindeki konumu takip eder
@@ -375,14 +375,22 @@
             "Unutma, her 'Hayır'ın ardında kocaman bir 'Evet' gizli olabilir. Belki de şimdi tam zamanıdır? ❤️‍🩹"
         ];
 
-        // YouTube video base URL'sini doğrudan verdiğin linkten alıyoruz
-        // Bu kısım artık dinamik olarak src'den alınacak ve parametreler temizlenecek
-        const getCleanYouTubeBaseUrl = (url) => {
-            const parts = url.split('?');
-            return parts[0];
-        };
-        const initialYoutubeBaseUrl = getCleanYouTubeBaseUrl(loveSongPlayer.src);
+        // YouTube IFrame Player API yükleme
+        let player; // YouTube oynatıcısını tutacak değişken
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('loveSongPlayer', {
+                events: {
+                    'onReady': onPlayerReady,
+                    // 'onStateChange': onPlayerStateChange // İstersen video durumu değişikliklerini izleyebilirsin
+                }
+            });
+        }
 
+        function onPlayerReady(event) {
+            // Player hazır olduğunda (video yüklendiğinde) otomatik oynatma denemesi YAPMIYORUZ.
+            // Sadece "Hayır" butonuna basıldığında oynatacağız.
+            // event.target.mute(); // Başlangıçta sessiz yap
+        }
 
         // "Hayır" butonuna basıldığında tetiklenecek olay
         noBtn.addEventListener('click', (e) => {
@@ -396,11 +404,15 @@
             // Kalp patlaması efekti
             createButtonHeartBurst(e.clientX, e.clientY);
 
-            // Şarkıyı baştan başlatma
-            if (loveSongPlayer) {
-                // Her tıklamada videoyu baştan başlatmak için 'start=0' ve 'autoplay=1' ekliyoruz.
-                // Mobil cihazlar için 'mute=1' de eklendi, bu otomatik oynatma şansını artırır.
-                loveSongPlayer.src = `${initialYoutubeBaseUrl}?autoplay=1&mute=1&start=0&enablejsapi=1`;
+            // Şarkıyı baştan başlatma (API ile)
+            if (player) { // Player objesi hazırsa
+                player.seekTo(0); // Videoyu baştan başlat
+                player.playVideo(); // Videoyu oynat
+                player.mute(); // Sessiz başlat (iOS kısıtlamaları için önemli)
+            } else {
+                // Eğer player henüz yüklenmediyse veya hata varsa, iframe src'yi tekrar atayarak dene (yedek)
+                const videoId = loveSongPlayerIframe.src.split('/').pop().split('?')[0]; // Video ID'sini URL'den al
+                loveSongPlayerIframe.src = `https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID6`;
             }
         });
 
@@ -414,8 +426,10 @@
             resultDiv.style.display = 'flex';
 
             // "Evet"e basıldığında müziği durdururuz
-            if (loveSongPlayer) {
-                loveSongPlayer.src = ""; // Videoyu durdurur ve iframe'i sıfırlar
+            if (player) {
+                player.stopVideo(); // Videoyu durdur
+            } else if (loveSongPlayerIframe) {
+                loveSongPlayerIframe.src = ""; // Yedek durdurma
             }
         });
 
@@ -484,6 +498,12 @@
                 heart.addEventListener('animationend', () => heart.remove());
             }
         }
+
+        // YouTube IFrame Player API'sini yüklemek için gerekli script
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID7";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     </script>
 </body>
 </html>
