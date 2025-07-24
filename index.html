@@ -11,7 +11,7 @@
             font-family: 'Arial', sans-serif; /* Yedek font */
             /* Arka plan resmi buraya eklendi! */
             background: linear-gradient(135deg, rgba(255, 238, 240, 0.7), rgba(255, 209, 220, 0.7)), url('https://i.imgur.com/ddtVClO.jpeg');
-            background-size: 105%; /* Başlangıçta biraz büyük */
+            background-size: cover;
             background-position: center center;
             background-attachment: fixed; /* Arka planın kaymasını engeller */
             text-align: center;
@@ -24,13 +24,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            animation: hafifZoom 20s infinite alternate ease-in-out; /* Animasyonu ekledik */
-        }
-
-        /* Hafif Zoom Animasyonu */
-        @keyframes hafifZoom {
-            0% { background-size: 105%; }
-            100% { background-size: 110%; }
         }
 
         /* İlk Ekran Mesajı - Yeni font uygulandı */
@@ -337,11 +330,10 @@
         <p id="contact-message">Beni ara lütfen ❤️</p>
         <div id="video-container">
             <iframe
-                id="loveSongPlayer"
-                src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID5"
+                src="https://www.youtube.com/embed/RjKxPnbWkEQ?autoplay=1&mute=0&controls=0&loop=1&playlist=RjKxPnbWkEQ&start=60"
                 allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
-                title="Yalın - En Baştan">
+                title="Yeni Şarkı">
             </iframe>
         </div>
     </div>
@@ -355,65 +347,37 @@
         const resultDiv = document.getElementById('result');
         const mainQuestion = document.getElementById('main-question');
         const noMessageContainer = document.getElementById('no-message-container');
-        const loveSongPlayerIframe = document.getElementById('loveSongPlayer'); // iframe elementini aldık
 
         let yesScale = 1;
         let messageIndex = 0; // Mesaj dizisindeki konumu takip eder
 
         const noMessages = [
-            "Emin misin, minik sevgilim? 🥺",
-            "Ne olur, kalbini bir daha dinle. Biliyorum, içten içe her şeyi düzeltip barışmak istiyorsun. ❤️",
-            "Gel, aşkımızın o ilk heyecanına yeniden dönelim mi? Her şey bizi bekliyor. ✨",
-            "Biliyorum, yüz yüze geldiğimizde tüm sorunlarımız uçup gidecek bunu sen de biliyorsun. 😇",
-            "Sadece bir telefon, bir buluşma... Biliyorum, her şeyi düzeltebiliriz güzelim. 📞",
-            "Hayır'ın kabul edilemez olduğu tek bir yer var, o da benim kalbim. 💔",
-            "Katmer yediğimiz, beraber uyuduğumuz, beraber gezdiğimiz, beraber geçirdiğimiz her anı düşün güzelim. Bazen mesafeler bazı şeyleri götürüyor ama çok az kaldı buluşmamıza. 💭",
-            "En kısa zamanda Aksaray'a geleyim, yüz yüze konuşalım minik kurbağam? 🐸",
-            "Bak işte, hala hayır diyorsun... Kalbim dayanır mı sence buna? 😔",
-            "Pes etmek yok! Unutma, 'Aşk sabır işidir' derler. Ve ben sana olan aşkımda çok sabırlıyım. 😉",
-            "Senin o nazlı 'Hayır'ların bile, beni sana daha çok bağlıyor. Farkında mısın? 😊",
-            "Unutma, her 'Hayır'ın ardında kocaman bir 'Evet' gizli olabilir. Belki de şimdi tam zamanıdır? ❤️‍🩹"
+            "Emin misin, minik sevgilim?", // 0
+            "Ne olur, kalbini bir daha dinle. Biliyorum, içten içe her şeyi düzeltip barışmak istiyorsun. ❤️", // 1
+            "Gel, aşkımızın o ilk heyecanına yeniden dönelim mi? Her şey bizi bekliyor. ✨", // 2
+            "Biliyorum, yüz yüze geldiğimizde tüm sorunlarımız uçup gidecek bunu sen de biliyorsun.", // 3
+            "Sadece bir telefon, bir buluşma... Biliyorum, her şeyi düzeltebiliriz güzelim.", // 4
+            "Hayır'ın kabul edilemez olduğu tek bir yer var, o da benim kalbim.", // 5
+            "Katmer yediğimiz, beraber uyuduğumuz, beraber gezdiğimiz, beraber geçirdiğimiz her anı düşün güzelim. Bazen mesafeler bazı şeyleri götürüyor ama çok az kaldı buluşmamıza.", // 6
+            "En kısa zamanda Aksaray'a geleyim, yüz yüze konuşalım minik kurbağam?", // 7
+            // Yeni Zaman Bazlı Mesajlar (Örnekler)
+            "Bak işte, hala hayır diyorsun... Kalbim dayanır mı sence buna? 😔", // 8 (Örn: 9. basıştan sonra)
+            "Pes etmek yok! Unutma, 'Aşk sabır işidir' derler. Ve ben sana olan aşkımda çok sabırlıyım. 😉", // 9 (Örn: 12. basıştan sonra)
+            "Senin o nazlı 'Hayır'ların bile, beni sana daha çok bağlıyor. Farkında mısın? 😊", // 10
+            "Unutma, her 'Hayır'ın ardında kocaman bir 'Evet' gizli olabilir. Belki de şimdi tam zamanıdır? ❤️‍🩹" // 11
         ];
-
-        // YouTube IFrame Player API yükleme
-        let player; // YouTube oynatıcısını tutacak değişken
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('loveSongPlayer', {
-                events: {
-                    'onReady': onPlayerReady,
-                    // 'onStateChange': onPlayerStateChange // İstersen video durumu değişikliklerini izleyebilirsin
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            // Player hazır olduğunda (video yüklendiğinde) otomatik oynatma denemesi YAPMIYORUZ.
-            // Sadece "Hayır" butonuna basıldığında oynatacağız.
-            // event.target.mute(); // Başlangıçta sessiz yap
-        }
 
         // "Hayır" butonuna basıldığında tetiklenecek olay
         noBtn.addEventListener('click', (e) => {
             yesScale += 0.2; // Her "Hayır"da "Evet" butonunu büyüt
             yesBtn.style.transform = `scale(${yesScale})`;
 
-            // Mesajı göster ve sırayı ilerlet
+            // Mesajı göster
             noMessageContainer.textContent = noMessages[(messageIndex = (messageIndex + 1) % noMessages.length)];
             noMessageContainer.style.opacity = 1; // Mesajı görünür yap
 
             // Kalp patlaması efekti
             createButtonHeartBurst(e.clientX, e.clientY);
-
-            // Şarkıyı baştan başlatma (API ile)
-            if (player) { // Player objesi hazırsa
-                player.seekTo(0); // Videoyu baştan başlat
-                player.playVideo(); // Videoyu oynat
-                player.mute(); // Sessiz başlat (iOS kısıtlamaları için önemli)
-            } else {
-                // Eğer player henüz yüklenmediyse veya hata varsa, iframe src'yi tekrar atayarak dene (yedek)
-                const videoId = loveSongPlayerIframe.src.split('/').pop().split('?')[0]; // Video ID'sini URL'den al
-                loveSongPlayerIframe.src = `https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID6`;
-            }
         });
 
         yesBtn.addEventListener('click', () => {
@@ -424,13 +388,6 @@
 
             // Sonuç ekranını görünür yap
             resultDiv.style.display = 'flex';
-
-            // "Evet"e basıldığında müziği durdururuz
-            if (player) {
-                player.stopVideo(); // Videoyu durdur
-            } else if (loveSongPlayerIframe) {
-                loveSongPlayerIframe.src = ""; // Yedek durdurma
-            }
         });
 
         // Genel kalpler için fonksiyon
@@ -438,19 +395,13 @@
             const heart = document.createElement('div');
             heart.classList.add('heart');
             const colors = ['#ff5c8d', '#ff81a9', '#ff99bb', '#ff74a2'];
-            const color = colors[Math.floor(Math.random() * colors.length)]; // Rastgele renk
+            const color = colors.sort(() => Math.random() - 0.5)[0]; // Rastgele renk
             heart.style.backgroundColor = color;
             heart.style.setProperty('filter', `drop-shadow(0 0 5px ${color})`);
             heart.style.left = Math.random() * 100 + 'vw';
-            const size = 20 + Math.random() * 10; // Kalp boyutunu çeşitlendir
+            const size = 20 + Math.random() * 10;
             heart.style.width = size + 'px';
             heart.style.height = size + 'px';
-            
-            // Kalp öncesi ve sonrası elementlerinin boyutlarını da ayarla
-            heart.style.setProperty('--heart-size', `${size}px`); // CSS değişkeni ile boyut kontrolü
-            heart.style.setProperty('--heart-top-offset', `-${size / 2}px`);
-            heart.style.setProperty('--heart-left-offset', `${size / 2}px`);
-
             heart.style.animationDuration = (5 + Math.random() * 3) + 's, ' + (3 + Math.random() * 3) + 's';
             document.getElementById('hearts-container').appendChild(heart);
             heart.addEventListener('animationend', () => heart.remove());
@@ -471,7 +422,7 @@
                 const size = 8 + Math.random() * 6; // 8px ile 14px arası
                 heart.style.width = size + 'px';
                 heart.style.height = size + 'px';
-                heart.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]; // Rastgele renk
+                heart.style.backgroundColor = colors.sort(() => Math.random() - 0.5)[0]; // Rastgele renk
                 heart.style.setProperty('filter', `drop-shadow(0 0 2px ${heart.style.backgroundColor})`);
                 heart.style.left = `${x - size / 2}px`; // Butona basılan yerin ortasına hizala
                 heart.style.top = `${y - size / 2}px`;
@@ -488,22 +439,11 @@
                 const duration = 0.6 + Math.random() * 0.4; // Animasyon süresi
                 heart.style.animationDuration = `${duration}s`;
 
-                // Kalp öncesi ve sonrası elementlerinin boyutlarını da ayarla (burst için)
-                heart.style.setProperty('--burst-heart-size', `${size}px`); 
-                heart.style.setProperty('--burst-heart-top-offset', `-${size / 2}px`);
-                heart.style.setProperty('--burst-heart-left-offset', `${size / 2}px`);
-
                 container.appendChild(heart);
 
                 heart.addEventListener('animationend', () => heart.remove());
             }
         }
-
-        // YouTube IFrame Player API'sini yüklemek için gerekli script
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID7";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     </script>
 </body>
 </html>
