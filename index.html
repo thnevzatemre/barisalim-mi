@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barışalım mı?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif; /* Yedek font */
+            /* Arka plan resmi buraya eklendi! */
+            background: linear-gradient(135deg, rgba(255, 238, 240, 0.7), rgba(255, 209, 220, 0.7)), url('https://i.imgur.com/ddtVClO.jpeg');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed; /* Arka planın kaymasını engeller */
+            text-align: center;
+            color: #d6336c;
+            overflow-x: hidden;
+            height: 100vh;
+            position: relative;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* İlk Ekran Mesajı - Yeni font uygulandı */
+        #main-question {
+            font-size: 56px;
+            margin-top: 100px;
+            text-shadow: 0 0 20px #ff9ac8;
+            z-index: 10;
+            position: relative;
+            font-weight: bold;
+            color: #e91e63;
+            font-family: 'Pacifico', cursive; /* Yeni font */
+        }
+
+        /* Butonlar */
+        #buttons {
+            margin-top: 60px;
+            z-index: 10;
+            position: relative;
+            display: flex;
+            gap: 40px;
+        }
+
+        button {
+            font-size: 24px;
+            padding: 16px 36px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 14px rgba(214, 51, 108, 0.5);
+            user-select: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        #yes {
+            background-color: #e91e63;
+            box-shadow: 0 6px 18px #e91e63cc;
+        }
+
+        #yes:hover {
+            background-color: #d81b60;
+            box-shadow: 0 8px 22px #d81b60dd;
+            transform: scale(1.05);
+        }
+
+        #no {
+            background-color: #f48fb1;
+            box-shadow: 0 6px 14px rgba(214, 51, 108, 0.5);
+        }
+
+        #no:hover {
+            background-color: #f06292;
+            box-shadow: 0 8px 20px #f06292dd;
+            transform: scale(1.05);
+        }
+
+        /* Kalpler (Genel) */
+        #hearts-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -60px;
+            width: 20px;
+            height: 20px;
+            background-color: #ff5c8d;
+            transform: rotate(45deg);
+            animation-name: floatUp, swaySide;
+            animation-timing-function: linear, ease-in-out;
+            animation-iteration-count: 1, infinite;
+            opacity: 0.95;
+            filter: drop-shadow(0 0 5px #ff7fa8);
+            will-change: transform, opacity;
+            z-index: 1;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #ff5c8d;
+            border-radius: 50%;
+            filter: drop-shadow(0 0 5px #ff7fa8);
+        }
+
+        .heart::before {
+            top: -10px;
+            left: 0;
+        }
+
+        .heart::after {
+            left: 10px;
+            top: 0;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(45deg);
+                opacity: 0.95;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swaySide {
+            0%, 100% {
+                transform: translateX(0) rotate(45deg);
+            }
+            50% {
+                transform: translateX(15px) rotate(45deg);
+            }
+        }
+
+        /* Buton "Hayır" için küçük kalp patlaması */
+        .btn-heart-burst {
+            position: absolute;
+            background-color: #ff5c8d;
+            transform: rotate(45deg);
+            opacity: 0;
+            animation: burstFadeOut 0.8s forwards;
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px #ff7fa8);
+        }
+        .btn-heart-burst::before,
+        .btn-heart-burst::after {
+            content: "";
+            position: absolute;
+            background-color: #ff5c8d;
+            border-radius: 50%;
+        }
+        /* Boyutlar ve konumlandırma animasyonla kontrol edilecek */
+        @keyframes burstFadeOut {
+            0% { transform: translate(0, 0) scale(1) rotate(45deg); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0) rotate(45deg); opacity: 0; }
+        }
+
+
+        /* "Hayır" Mesajları - Yeni font uygulandı */
+        #no-message-container {
+            margin-top: 20px;
+            font-size: 28px;
+            color: #e91e63;
+            text-shadow: 0 0 8px #ff9ac8;
+            min-height: 50px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 10;
+            font-family: 'Pacifico', cursive;
+            line-height: 1.3;
+            padding: 0 10px;
+            max-width: 80%;
+        }
+
+        /* Sonuç Ekranı (Başlangıçta Gizli) */
+        #result {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-message {
+            font-size: 56px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #ff9ac8;
+            z-index: 10;
+            position: relative;
+            font-weight: bold;
+            color: #e91e63;
+            font-family: 'Pacifico', cursive;
+        }
+
+        #contact-message {
+            font-size: 28px;
+            margin-top: 30px;
+            color: #d6336c;
+            text-shadow: 0 0 10px #ff9ac8;
+            z-index: 10;
+            position: relative;
+            font-family: 'Pacifico', cursive;
+        }
+
+        #photo-collage-container {
+            margin-top: 40px;
+            max-width: 900px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        #photo-collage {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            justify-items: center;
+        }
+
+        #photo-collage img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 8px 18px rgba(233, 30, 99, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        #photo-collage img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 26px rgba(233, 30, 99, 0.8);
+            z-index: 10;
+            position: relative;
+        }
+
+        #video-container {
+            width: 560px;
+            height: 315px;
+            margin-top: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(214, 51, 108, 0.5);
+        }
+
+        #video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Küçük ekranlar için responsive ayarlar */
+        @media (max-width: 768px) {
+            #main-question {
+                font-size: 40px;
+            }
+            .main-message {
+                font-size: 40px;
+            }
+            button {
+                font-size: 18px;
+                padding: 12px 24px;
+                margin: 0 10px;
+            }
+            #photo-collage {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            #photo-collage img {
+                width: 150px;
+                height: 150px;
+            }
+            #video-container {
+                width: 90%;
+                height: 250px; /* Oranını korumak için yüksekliği ayarla */
+            }
+            #no-message-container {
+                font-size: 20px; /* Mobil için font boyutunu ayarla */
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="main-question">Barışalım mı?</h1>
+
+    <div id="buttons">
+        <button id="yes">Evet</button>
+        <button id="no">Hayır</button>
+    </div>
+
+    <div id="no-message-container"></div>
+
+    <div id="result">
+        <div class="main-message">Seni Çok Seviyorum Minik Sevgilim!</div>
+        <div id="photo-collage-container">
+            <div id="photo-collage">
+                <img src="resim1.jpg" alt="Foto 1" />
+                <img src="resim2.jpg" alt="Foto 2" />
+                <img src="resim3.jpg" alt="Foto 3" />
+                <img src="resim4.jpg" alt="Foto 4" />
+                <img src="resim5.jpg" alt="Foto 5" />
+                <img src="resim6.jpg" alt="Foto 6" />
+                <img src="resim7.jpg" alt="Foto 7" />
+            </div>
+        </div>
+        <p id="contact-message">Beni ara lütfen ❤️</p>
+        <div id="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/RjKxPnbWkEQ?autoplay=1&mute=0&controls=0&loop=1&playlist=RjKxPnbWkEQ&start=60"
+                allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                title="Yeni Şarkı">
+            </iframe>
+        </div>
+    </div>
+
+    <div id="hearts-container"></div>
+
+    <script>
+        const yesBtn = document.getElementById('yes');
+        const noBtn = document.getElementById('no');
+        const buttonsDiv = document.getElementById('buttons');
+        const resultDiv = document.getElementById('result');
+        const mainQuestion = document.getElementById('main-question');
+        const noMessageContainer = document.getElementById('no-message-container');
+
+        let yesScale = 1;
+        let messageIndex = 0; // Mesaj dizisindeki konumu takip eder
+
+        const noMessages = [
+            "Emin misin, minik sevgilim?", // 0
+            "Ne olur, kalbini bir daha dinle. Biliyorum, içten içe her şeyi düzeltip barışmak istiyorsun. ❤️", // 1
+            "Gel, aşkımızın o ilk heyecanına yeniden dönelim mi? Her şey bizi bekliyor. ✨", // 2
+            "Biliyorum, yüz yüze geldiğimizde tüm sorunlarımız uçup gidecek bunu sen de biliyorsun.", // 3
+            "Sadece bir telefon, bir buluşma... Biliyorum, her şeyi düzeltebiliriz güzelim.", // 4
+            "Hayır'ın kabul edilemez olduğu tek bir yer var, o da benim kalbim.", // 5
+            "Katmer yediğimiz, beraber uyuduğumuz, beraber gezdiğimiz, beraber geçirdiğimiz her anı düşün güzelim. Bazen mesafeler bazı şeyleri götürüyor ama çok az kaldı buluşmamıza.", // 6
+            "En kısa zamanda Aksaray'a geleyim, yüz yüze konuşalım minik kurbağam?", // 7
+            // Yeni Zaman Bazlı Mesajlar (Örnekler)
+            "Bak işte, hala hayır diyorsun... Kalbim dayanır mı sence buna? 😔", // 8 (Örn: 9. basıştan sonra)
+            "Pes etmek yok! Unutma, 'Aşk sabır işidir' derler. Ve ben sana olan aşkımda çok sabırlıyım. 😉", // 9 (Örn: 12. basıştan sonra)
+            "Senin o nazlı 'Hayır'ların bile, beni sana daha çok bağlıyor. Farkında mısın? 😊", // 10
+            "Unutma, her 'Hayır'ın ardında kocaman bir 'Evet' gizli olabilir. Belki de şimdi tam zamanıdır? ❤️‍🩹" // 11
+        ];
+
+        // "Hayır" butonuna basıldığında tetiklenecek olay
+        noBtn.addEventListener('click', (e) => {
+            yesScale += 0.2; // Her "Hayır"da "Evet" butonunu büyüt
+            yesBtn.style.transform = `scale(${yesScale})`;
+
+            // Mesajı göster
+            noMessageContainer.textContent = noMessages[(messageIndex = (messageIndex + 1) % noMessages.length)];
+            noMessageContainer.style.opacity = 1; // Mesajı görünür yap
+
+            // Kalp patlaması efekti
+            createButtonHeartBurst(e.clientX, e.clientY);
+        });
+
+        yesBtn.addEventListener('click', () => {
+            // İlk ekranı gizle
+            buttonsDiv.style.display = 'none';
+            mainQuestion.style.display = 'none';
+            noMessageContainer.style.display = 'none'; // Mesaj konteynerini de gizle
+
+            // Sonuç ekranını görünür yap
+            resultDiv.style.display = 'flex';
+        });
+
+        // Genel kalpler için fonksiyon
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            const colors = ['#ff5c8d', '#ff81a9', '#ff99bb', '#ff74a2'];
+            const color = colors.sort(() => Math.random() - 0.5)[0]; // Rastgele renk
+            heart.style.backgroundColor = color;
+            heart.style.setProperty('filter', `drop-shadow(0 0 5px ${color})`);
+            heart.style.left = Math.random() * 100 + 'vw';
+            const size = 20 + Math.random() * 10;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            heart.style.animationDuration = (5 + Math.random() * 3) + 's, ' + (3 + Math.random() * 3) + 's';
+            document.getElementById('hearts-container').appendChild(heart);
+            heart.addEventListener('animationend', () => heart.remove());
+        }
+        setInterval(createHeart, 200); // 200ms'de bir yeni kalp oluştur
+
+        // Buton basımı için kalp patlaması fonksiyonu
+        function createButtonHeartBurst(x, y) {
+            const numHearts = 5 + Math.floor(Math.random() * 3); // 5 ila 7 kalp
+            const colors = ['#ff5c8d', '#ff81a9', '#ff99bb', '#ff74a2'];
+            const container = document.getElementById('hearts-container'); // Kalpleri genel konteynere ekleyelim
+
+            for (let i = 0; i < numHearts; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('btn-heart-burst');
+
+                // Kalplerin boyutu ve rengi
+                const size = 8 + Math.random() * 6; // 8px ile 14px arası
+                heart.style.width = size + 'px';
+                heart.style.height = size + 'px';
+                heart.style.backgroundColor = colors.sort(() => Math.random() - 0.5)[0]; // Rastgele renk
+                heart.style.setProperty('filter', `drop-shadow(0 0 2px ${heart.style.backgroundColor})`);
+                heart.style.left = `${x - size / 2}px`; // Butona basılan yerin ortasına hizala
+                heart.style.top = `${y - size / 2}px`;
+
+                // Kalp parçalarının rastgele hareket yönleri
+                const angle = Math.random() * Math.PI * 2; // 0'dan 360 dereceye kadar açı
+                const distance = 30 + Math.random() * 20; // 30px ile 50px arası mesafe
+                const endX = Math.cos(angle) * distance;
+                const endY = Math.sin(angle) * distance;
+
+                heart.style.setProperty('--x', `${endX}px`);
+                heart.style.setProperty('--y', `${endY}px`);
+
+                const duration = 0.6 + Math.random() * 0.4; // Animasyon süresi
+                heart.style.animationDuration = `${duration}s`;
+
+                container.appendChild(heart);
+
+                heart.addEventListener('animationend', () => heart.remove());
+            }
+        }
+    </script>
+</body>
+</html>
