@@ -338,7 +338,7 @@
         <div id="video-container">
             <iframe
                 id="loveSongPlayer"
-                src="https://www.youtube.com/embed/RjKxPnbWkEQ?autoplay=1&mute=0&controls=0&loop=1&playlist=RjKxPnbWkEQ&start=60"
+                src="https://www.youtube.com/watch?v=WdnULqAm824"
                 allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
                 title="Yalın - En Baştan">
@@ -375,9 +375,14 @@
             "Unutma, her 'Hayır'ın ardında kocaman bir 'Evet' gizli olabilir. Belki de şimdi tam zamanıdır? ❤️‍🩹"
         ];
 
-        // YouTube video base URL'sini alıyoruz (autoplay, mute vb. parametreler olmadan)
-        // Eğer YouTube linkini değiştirirsen buradaki initialSrc'yi de kontrol et.
-        const youtubeBaseUrl = loveSongPlayer.src.split('?')[0];
+        // YouTube video base URL'sini doğrudan verdiğin linkten alıyoruz
+        // Bu kısım artık dinamik olarak src'den alınacak ve parametreler temizlenecek
+        const getCleanYouTubeBaseUrl = (url) => {
+            const parts = url.split('?');
+            return parts[0];
+        };
+        const initialYoutubeBaseUrl = getCleanYouTubeBaseUrl(loveSongPlayer.src);
+
 
         // "Hayır" butonuna basıldığında tetiklenecek olay
         noBtn.addEventListener('click', (e) => {
@@ -394,8 +399,8 @@
             // Şarkıyı baştan başlatma
             if (loveSongPlayer) {
                 // Her tıklamada videoyu baştan başlatmak için 'start=0' ve 'autoplay=1' ekliyoruz.
-                // Mobil cihazlar için genellikle 'mute=1' de gereklidir.
-                loveSongPlayer.src = `${youtubeBaseUrl}?autoplay=1&mute=1&start=0&enablejsapi=1`;
+                // Mobil cihazlar için 'mute=1' de eklendi, bu otomatik oynatma şansını artırır.
+                loveSongPlayer.src = `${initialYoutubeBaseUrl}?autoplay=1&mute=1&start=0&enablejsapi=1`;
             }
         });
 
@@ -408,14 +413,9 @@
             // Sonuç ekranını görünür yap
             resultDiv.style.display = 'flex';
 
-            // "Evet"e basıldığında müziği durdurabiliriz veya açabiliriz.
-            // Burada sessiz halden normale geçirelim (eğer mute=1 ile başladıysa).
+            // "Evet"e basıldığında müziği durdururuz
             if (loveSongPlayer) {
-                // Eğer autoplay ve mute ile başladıysa, şimdi sadece autoplay kalsın.
-                // Ancak mobil kısıtlamalar nedeniyle kullanıcı kendisi sesi açmak zorunda kalabilir.
-                // loveSongPlayer.src = `${youtubeBaseUrl}?autoplay=1&enablejsapi=1`;
-                // Veya durdurabiliriz:
-                loveSongPlayer.src = ""; // Videoyu durdurur
+                loveSongPlayer.src = ""; // Videoyu durdurur ve iframe'i sıfırlar
             }
         });
 
